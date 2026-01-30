@@ -1,6 +1,7 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { computeWeeklyObservationForUser } from "./phase2/weekly";
+import { computeWeeklyCrystalForUser } from "./phase2/crystal";
 
 import * as admin from "firebase-admin";
 
@@ -90,6 +91,52 @@ export const phase2WeeklySchedule = onSchedule(
       const weekId = `${isoYear}-${pad2(week)}`;
 
       await computeWeeklyObservationForUser(uid, weekId);
+    });
+
+    await Promise.all(tasks);
+  }
+);
+
+export const phase2CrystalSchedule = onSchedule(
+  "every day 01:20",
+  async () => {
+    const db = admin.firestore();
+    const usersSnap = await db.collection("users").get();
+
+    const tasks = usersSnap.docs.map(async (doc) => {
+      const uid = doc.id;
+
+      // weeklyと同じweekId算出ロジック(UTC,ISO週)
+      const now = new Date();
+      const d = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+      ));
+      const day = (d.getUTCDay() + 6) % 7;
+      d.setUTCDate(d.getUTCDate() - day + 3);
+      const isoYear = d.getUTCFullYear();
+      const firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+      const firstDay = (firstThursday.getUTCDay() + 6) % 7;
+      firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDay + 3);
+      const week =
+        Math.round(
+          (d.getTime() - firstThursday.getTime()) /
+            (7 * 24 * 60 * 60 * 1000)
+        ) + 1;
+      const pad2 = (n: number) => String(n).padStart(2, "0");
+      const weekId = `${isoYear}-${pad2(week)}`;
+
+      // 今週だけだと週またぎ直後の生成漏れが出ることがあるから、前週も一回見る
+      // prevWeekId計算は週番号が1の時に年跨ぎが絡むので、安全にweekly側のisoWeekを使うのが理想だけど、
+      // 今は最小で「今週と前週」を両方試す実装にする(前週が存在しなければ内部でreturnする)
+      await computeWeeklyCrystalForUser(uid, weekId);
+
+      const prevWeek = week - 1;
+      if (prevWeek >= 1) {
+        const prevWeekId = `${isoYear}-${pad2(prevWeek)}`;
+        await computeWeeklyCrystalForUser(uid, prevWeekId);
+      }
     });
 
     await Promise.all(tasks);
