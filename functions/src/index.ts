@@ -2,6 +2,7 @@ import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { computeWeeklyObservationForUser } from "./phase2/weekly";
 import { computeWeeklyCrystalForUser } from "./phase2/crystal";
+import { computeWeeklyOverlayForUser } from "./phase3/overlay";
 
 import * as admin from "firebase-admin";
 
@@ -136,6 +137,51 @@ export const phase2CrystalSchedule = onSchedule(
       if (prevWeek >= 1) {
         const prevWeekId = `${isoYear}-${pad2(prevWeek)}`;
         await computeWeeklyCrystalForUser(uid, prevWeekId);
+      }
+    });
+
+    await Promise.all(tasks);
+  }
+);
+
+export const phase3OverlaySchedule = onSchedule(
+  "every day 01:30",
+  async () => {
+    const db = admin.firestore();
+    const usersSnap = await db.collection("users").get();
+
+    const tasks = usersSnap.docs.map(async (doc) => {
+      const uid = doc.id;
+
+      // weekly / crystal と同一の weekId 算出ロジック（UTC / ISO週）
+      const now = new Date();
+      const d = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+      ));
+      const day = (d.getUTCDay() + 6) % 7;
+      d.setUTCDate(d.getUTCDate() - day + 3);
+      const isoYear = d.getUTCFullYear();
+      const firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+      const firstDay = (firstThursday.getUTCDay() + 6) % 7;
+      firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDay + 3);
+      const week =
+        Math.round(
+          (d.getTime() - firstThursday.getTime()) /
+            (7 * 24 * 60 * 60 * 1000)
+        ) + 1;
+      const pad2 = (n: number) => String(n).padStart(2, "0");
+      const weekId = `${isoYear}-${pad2(week)}`;
+
+      // 今週
+      await computeWeeklyOverlayForUser(uid, weekId);
+
+      // 前週（Crystal 生成遅延対策）
+      const prevWeek = week - 1;
+      if (prevWeek >= 1) {
+        const prevWeekId = `${isoYear}-${pad2(prevWeek)}`;
+        await computeWeeklyOverlayForUser(uid, prevWeekId);
       }
     });
 
