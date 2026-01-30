@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { signInAnonymously } from "firebase/auth";
-import { addDoc, collection, serverTimestamp,query,orderBy,getDocs, } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, serverTimestamp,query,orderBy,getDocs, } from "firebase/firestore";
 import { auth, db } from "./lib/firebase";
 
 export default function Home() {
@@ -10,6 +10,12 @@ export default function Home() {
   const [text, setText] = useState("");
   const [fragments, setFragments] = useState<any[]>([]);
 
+  const [contextLabel, setContextLabel] = useState("");
+  const [contextStart, setContextStart] = useState("");
+  const [contextEnd, setContextEnd] = useState("");
+  const [contexts, setContexts] = useState<
+    { id: string; label: string; startAt: any; endAt: any }[]
+  >([]);
 
   useEffect(() => {
     signInAnonymously(auth)
@@ -36,6 +42,51 @@ export default function Home() {
     setText("");
     alert("saved");
   };
+
+  const saveContext = async () => {
+    if (!uid) return;
+    if (!contextLabel.trim()) return;
+    if (!contextStart || !contextEnd) return;
+
+    const startDate = new Date(contextStart);
+    const endDate = new Date(contextEnd);
+
+    await addDoc(collection(db, `users/${uid}/contexts`), {
+      label: contextLabel,
+      startAt: startDate,
+      endAt: endDate,
+      createdAt: serverTimestamp(),
+    });
+
+    setContextLabel("");
+    setContextStart("");
+    setContextEnd("");
+  };
+
+  useEffect(() => {
+    if (!uid) return;
+
+    const q = query(
+      collection(db, `users/${uid}/contexts`),
+      orderBy("startAt", "desc")
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((d) => {
+        const data = d.data() as any;
+        return {
+          id: d.id,
+          label: data.label,
+          startAt: data.startAt,
+          endAt: data.endAt,
+        };
+      });
+      setContexts(list);
+    });
+
+    return () => unsub();
+  }, [uid]);
+
 
   useEffect(() => {
     if (!uid) return;
@@ -81,6 +132,63 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+      <hr style={{ margin: "24px 0" }} />
+
+        <h2>Context</h2>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 520 }}>
+          <input
+            value={contextLabel}
+            onChange={(e) => setContextLabel(e.target.value)}
+            placeholder="label (例: 試験期間 / 旅行 / 体調不良)"
+          />
+
+          <label>
+            start
+            <input
+              type="datetime-local"
+              value={contextStart}
+              onChange={(e) => setContextStart(e.target.value)}
+            />
+          </label>
+
+          <label>
+            end
+            <input
+              type="datetime-local"
+              value={contextEnd}
+              onChange={(e) => setContextEnd(e.target.value)}
+            />
+          </label>
+
+          <button onClick={saveContext}>save context</button>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          {contexts.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                padding: 8,
+                border: "1px solid #ddd",
+                marginBottom: 8,
+              }}
+            >
+              <div>{c.label}</div>
+              <div>
+                {c.startAt?.toDate
+                  ? c.startAt.toDate().toISOString()
+                  : String(c.startAt)}
+                {" 〜 "}
+                {c.endAt?.toDate
+                  ? c.endAt.toDate().toISOString()
+                  : String(c.endAt)}
+              </div>
+            </div>
+          ))}
+        </div>
+
 
     </div>
   );
