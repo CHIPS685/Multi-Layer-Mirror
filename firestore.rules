@@ -28,5 +28,10 @@ service cloud.firestore {
       allow read: if isOwner(uid);
       allow write: if false;
     }
+
+    match /users/{uid}/overlays/{overlayId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
   }
 }
