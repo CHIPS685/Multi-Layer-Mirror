@@ -1,7 +1,15 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { computeWeeklyObservationForUser } from "./phase2/weekly";
+
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
+
+if (admin.apps.length === 0) {
+  admin.initializeApp();
+}
+
 
 /**
  * Phase1-2: Fragment 作成 → 自動で Observation を生成する
@@ -46,5 +54,44 @@ export const onFragmentCreate = onDocumentCreated(
         control: "v1",
       },
     });
+  }
+);
+
+
+export const phase2WeeklySchedule = onSchedule(
+  "every day 01:10",
+  async () => {
+    const db = admin.firestore();
+
+    const usersSnap = await db.collection("users").get();
+
+    const tasks = usersSnap.docs.map(async (doc) => {
+      const uid = doc.id;
+
+      // 今週の weekId を計算
+      const now = new Date();
+      const d = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+      ));
+      const day = (d.getUTCDay() + 6) % 7;
+      d.setUTCDate(d.getUTCDate() - day + 3);
+      const isoYear = d.getUTCFullYear();
+      const firstThursday = new Date(Date.UTC(isoYear, 0, 4));
+      const firstDay = (firstThursday.getUTCDay() + 6) % 7;
+      firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDay + 3);
+      const week =
+        Math.round(
+          (d.getTime() - firstThursday.getTime()) /
+            (7 * 24 * 60 * 60 * 1000)
+        ) + 1;
+      const pad2 = (n: number) => String(n).padStart(2, "0");
+      const weekId = `${isoYear}-${pad2(week)}`;
+
+      await computeWeeklyObservationForUser(uid, weekId);
+    });
+
+    await Promise.all(tasks);
   }
 );
