@@ -3,6 +3,8 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import { computeWeeklyObservationForUser } from "./phase2/weekly";
 import { computeWeeklyCrystalForUser } from "./phase2/crystal";
 import { computeWeeklyOverlayForUser } from "./phase3/overlay";
+import { analyzeFragmentWithGemini } from "./phase4/gemini";
+import { defineString } from "firebase-functions/params";
 
 import * as admin from "firebase-admin";
 
@@ -12,12 +14,15 @@ if (admin.apps.length === 0) {
   admin.initializeApp();
 }
 
+export const GEMINI_API_KEY = defineString("GEMINI_API_KEY");
+
 
 /**
  * Phase1-2: Fragment 作成 → 自動で Observation を生成する
  * - Fragment は絶対に書き換えない
  * - Observation は 1 Fragment : 1 Observation
  */
+
 export const onFragmentCreate = onDocumentCreated(
   "users/{uid}/fragments/{fragmentId}",
   async (event) => {
@@ -26,36 +31,57 @@ export const onFragmentCreate = onDocumentCreated(
 
     const { uid, fragmentId } = event.params;
 
+    // Fragment本文を取得
+    const fragment = snap.data() as { content?: string };
+    const content = fragment.content;
+    if (!content || typeof content !== "string") return;
+
     const observationRef = admin
       .firestore()
       .doc(`users/${uid}/observations/${fragmentId}`);
 
-    // Phase1-2 ではダミー Observation を作る
+    //  Phase4 Analyzer
+    // Phase4 Analyzer
+    const analyzed = await analyzeFragmentWithGemini(content);
+
+    if (!analyzed) {
+      console.log("Gemini failed, fallback to dummy");
+
+      await observationRef.set({
+        fragmentId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        axisScores: {
+          action: 0.5,
+          obstacle: 0.5,
+          evaluation: 0.5,
+          control: 0.5,
+        },
+        axisEvidence: {
+          action: [],
+          obstacle: [],
+          evaluation: [],
+          control: [],
+        },
+        axisVersionMap: {
+          action: "dummy_v1",
+          obstacle: "dummy_v1",
+          evaluation: "dummy_v1",
+          control: "dummy_v1",
+        },
+      });
+
+      return;
+    }
+
+    // Gemini 成功時だけここに来る
     await observationRef.set({
-      fragmentId: fragmentId,
+      fragmentId,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-
-      axisScores: {
-        action: 0.5,
-        obstacle: 0.5,
-        evaluation: 0.5,
-        control: 0.5,
-      },
-
-      axisEvidence: {
-        action: [],
-        obstacle: [],
-        evaluation: [],
-        control: [],
-      },
-
-      axisVersionMap: {
-        action: "v1",
-        obstacle: "v1",
-        evaluation: "v1",
-        control: "v1",
-      },
+      axisScores: analyzed.axisScores,
+      axisEvidence: analyzed.axisEvidence,
+      axisVersionMap: analyzed.axisVersionMap,
     });
+
   }
 );
 
