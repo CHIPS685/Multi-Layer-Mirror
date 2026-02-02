@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
+/* ===== 型定義 ===== */
+
 type WeeklyDoc = {
   weekId: string;
   selected?: {
     means: Record<string, number>;
   } | null;
-  deltaStatus: number;
 };
 
 type CrystalDoc = {
@@ -29,6 +30,8 @@ type WeekRow = {
   contexts: ContextDoc[];
 };
 
+/* ===== Page ===== */
+
 export default function TimelinePage() {
   const [uid, setUid] = useState<string | null>(null);
   const [weeks, setWeeks] = useState<WeekRow[]>([]);
@@ -47,14 +50,16 @@ export default function TimelinePage() {
     const load = async () => {
       setLoading(true);
 
-      // 表示したい週数（直近12週）
+      // 表示対象の週（直近12週）
       const targetWeeks = buildRecentWeekIds(12);
 
-      // Contextを一括取得
+      // Contextは一括取得
       const ctxSnap = await getDocs(
         collection(db, `users/${uid}/contexts`)
       );
-      const contexts: ContextDoc[] = ctxSnap.docs.map((d) => d.data() as any);
+      const contexts: ContextDoc[] = ctxSnap.docs.map(
+        (d) => d.data() as any
+      );
 
       const rows: WeekRow[] = [];
 
@@ -75,7 +80,7 @@ export default function TimelinePage() {
           ? (crystalSnap.data() as CrystalDoc)
           : null;
 
-        // Context重なり判定（UTC基準）
+        // Context重なり判定（UTC週）
         const period = isoWeekRangeUTC(weekId);
         const overlapped = contexts.filter((c) => {
           const s = c.startAt.toDate();
@@ -101,82 +106,93 @@ export default function TimelinePage() {
   if (loading) return <div>loading...</div>;
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Weekly Timeline</h1>
+    <div className="timeline-week">
+      <div style={{ padding: 24 }}>
+        <h1 className="page-title">Timeline</h1>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {weeks.map((w) => (
-          <div
-            key={w.weekId}
-            style={{
-              border: "1px solid #ddd",
-              padding: 12,
-              display: "grid",
-              gridTemplateColumns: "120px 1fr 1fr 1fr",
-              gap: 12,
-            }}
-          >
-            <div>{w.weekId}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {weeks.map((w) => (
+            <div
+              key={w.weekId}
+              style={{
+                border: "1px solid #ddd",
+                padding: 12,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              {/* week */}
+              <div>{w.weekId}</div>
 
-            <div>
-              <strong>Weekly</strong>
-              {w.weekly?.selected ? (
-                <ul>
-                  {Object.entries(w.weekly.selected.means).map(
-                    ([axis, val]) => (
-                      <li key={axis}>
-                        {axis}: {val.toFixed(3)}
-                      </li>
-                    )
-                  )}
-                </ul>
-              ) : (
-                <div>—</div>
-              )}
+              {/* weekly means */}
+              <div>
+                {w.weekly?.selected ? (
+                  <ul>
+                    {Object.entries(w.weekly.selected.means).map(
+                      ([axis, val]) => (
+                        <li key={axis}>
+                          {axis}: {val.toFixed(3)}
+                        </li>
+                      )
+                    )}
+                  </ul>
+                ) : (
+                  <div>—</div>
+                )}
+              </div>
+
+              {/* crystal */}
+              <div>
+                {w.crystal ? (
+                  <ul>
+                    {w.crystal.lines.map((l, i) => (
+                      <li key={i}>{l}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div>—</div>
+                )}
+              </div>
+
+              {/* context tags */}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {w.contexts.map((c, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      border: "1px solid #ccc",
+                      borderRadius: 12,
+                      padding: "2px 8px",
+                      fontSize: 12,
+                    }}
+                  >
+                    {c.label}
+                  </span>
+                ))}
+              </div>
             </div>
-
-            <div>
-              <strong>Crystal</strong>
-              {w.crystal ? (
-                <ul>
-                  {w.crystal.lines.map((l, i) => (
-                    <li key={i}>{l}</li>
-                  ))}
-                </ul>
-              ) : (
-                <div>—</div>
-              )}
-            </div>
-
-            <div>
-              <strong>Context</strong>
-              {w.contexts.length > 0 ? (
-                <ul>
-                  {w.contexts.map((c, i) => (
-                    <li key={i}>{c.label}</li>
-                  ))}
-                </ul>
-              ) : (
-                <div>—</div>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 }
+
+/* ===== util ===== */
 
 function buildRecentWeekIds(n: number): string[] {
   const ids: string[] = [];
   const now = new Date();
 
   for (let i = 0; i < n; i++) {
-    const d = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate() - i * 7
-    ));
+    const d = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - i * 7
+      )
+    );
     ids.push(getIsoWeekIdUTC(d));
   }
 
@@ -184,17 +200,21 @@ function buildRecentWeekIds(n: number): string[] {
 }
 
 function getIsoWeekIdUTC(date: Date): string {
-  const d = new Date(Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate()
-  ));
+  const d = new Date(
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate()
+    )
+  );
   const day = (d.getUTCDay() + 6) % 7;
   d.setUTCDate(d.getUTCDate() - day + 3);
   const isoYear = d.getUTCFullYear();
   const firstThursday = new Date(Date.UTC(isoYear, 0, 4));
   const firstDay = (firstThursday.getUTCDay() + 6) % 7;
-  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDay + 3);
+  firstThursday.setUTCDate(
+    firstThursday.getUTCDate() - firstDay + 3
+  );
   const week =
     Math.round(
       (d.getTime() - firstThursday.getTime()) /
@@ -203,7 +223,10 @@ function getIsoWeekIdUTC(date: Date): string {
   return `${isoYear}-${String(week).padStart(2, "0")}`;
 }
 
-function isoWeekRangeUTC(weekId: string): { start: Date; end: Date } {
+function isoWeekRangeUTC(weekId: string): {
+  start: Date;
+  end: Date;
+} {
   const [yearStr, weekStr] = weekId.split("-");
   const year = Number(yearStr);
   const week = Number(weekStr);
@@ -211,7 +234,9 @@ function isoWeekRangeUTC(weekId: string): { start: Date; end: Date } {
   const jan4 = new Date(Date.UTC(year, 0, 4));
   const day = jan4.getUTCDay() || 7;
   const start = new Date(jan4);
-  start.setUTCDate(jan4.getUTCDate() - day + 1 + (week - 1) * 7);
+  start.setUTCDate(
+    jan4.getUTCDate() - day + 1 + (week - 1) * 7
+  );
 
   const end = new Date(start);
   end.setUTCDate(start.getUTCDate() + 7);

@@ -24,3 +24,123 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 全画面共通の最大幅 */
+.app-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* 見出しを主張しすぎない */
+h1 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+/* リストのノイズを消す */
+ul {
+  padding-left: 16px;
+  margin: 0;
+}
+
+li {
+  line-height: 1.6;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin: 48px 0 56px 0; 
+}
+
+.nav a {
+  font-size: 14px;
+  color: #666;
+  text-decoration: none;
+  padding-bottom: 4px;
+}
+
+.nav a.active {
+  color: #000;
+  font-weight: 600;
+  border-bottom: 1px solid #000;
+}
+
+.write-page textarea {
+  width: 100%;
+  min-height: 240px;
+  font-size: 16px;
+  line-height: 1.8;
+  border: none;
+  outline: none;
+  resize: vertical;
+}
+
+.write-page button {
+  margin-top: 24px;
+}
+
+.context-page label {
+  font-size: 13px;
+  color: #555;
+}
+
+.context-page input {
+  font-size: 14px;
+  padding: 6px 4px;
+  margin-bottom: 16px;
+}
+
+.context-page button {
+  margin-top: 24px;
+}
+
+.timeline-week {
+  padding: 16px 0;
+  border-left: 2px solid #eee;
+  padding-left: 16px;
+}
+
+.timeline-week + .timeline-week {
+  margin-top: 24px;
+}
+
+.timeline-week > div:first-child {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+/* Crystal lines */
+.timeline-week li {
+  line-height: 1.7;
+}
+
+/* Context tags */
+.timeline-week span {
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 40px;
+}
