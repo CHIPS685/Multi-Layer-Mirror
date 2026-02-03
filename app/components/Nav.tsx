@@ -16,6 +16,7 @@ export default function Nav() {
       <a href="/write">write</a>
       <a href="/context">context</a>
       <a href="/timeline">timeline</a>
+      <a href="/daily">daily</a>
     </nav>
   );
 }

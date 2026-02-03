@@ -14,7 +14,7 @@ export default function WritePage() {
     await addDoc(
       collection(db, `users/${auth.currentUser.uid}/fragments`),
       {
-        text,
+        content: text,
         createdAt: serverTimestamp(),
       }
     );
@@ -24,14 +24,20 @@ export default function WritePage() {
 
   return (
     <div className="write-page">
-      <main>
-        <h1 className="page-title">Write</h1>
-        <p className="page-subtitle">ここにそのまま書く</p>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="ここに書く"
+        style={{
+          width: "100%",
+          minHeight: "160px",
+          marginTop: "12px",
+        }}
+      />
 
-        <div style={{ marginTop: "16px" }}>
-          <button onClick={save}>保存</button>
-        </div>
-      </main>
+      <div style={{ marginTop: "16px" }}>
+        <button onClick={save}>保存</button>
+      </div>
     </div>
   );
 }

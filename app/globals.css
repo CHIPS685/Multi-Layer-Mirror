@@ -80,7 +80,6 @@ li {
   min-height: 240px;
   font-size: 16px;
   line-height: 1.8;
-  border: none;
   outline: none;
   resize: vertical;
 }
@@ -143,4 +142,25 @@ li {
   font-size: 14px;
   color: #666;
   margin-bottom: 40px;
+}
+
+.context-page input {
+  color: var(--foreground);
+  background-color: transparent;
+}
+
+input,
+textarea {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background-color: transparent;
+  color: var(--foreground);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #888;
 }
