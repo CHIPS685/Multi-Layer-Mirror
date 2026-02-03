@@ -45,5 +45,20 @@ service cloud.firestore {
       allow read: if isOwner(uid);
       allow write: if false;
     }
+    match /users/{uid}/dialogueSessions/{sessionId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+
+      match /turns/{turnId} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+    }
+
+    match /users/{uid}/prefills/{prefillId} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+
   }
 }
