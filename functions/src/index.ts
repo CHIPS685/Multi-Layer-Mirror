@@ -5,6 +5,10 @@ import { computeWeeklyCrystalForUser } from "./phase2/crystal";
 import { computeWeeklyOverlayForUser } from "./phase3/overlay";
 import { analyzeFragmentWithGemini } from "./phase4/gemini";
 import { defineString } from "firebase-functions/params";
+import { computeDailyForUser } from "./phase6/daily/computeDailyForUser";
+import { computeBaselineForUser } from "./phase6/baseline/computeBaselineForUser";
+import { jstTodayDateId, prevDateId } from "./phase6/shared/time";
+
 
 import * as admin from "firebase-admin";
 
@@ -209,6 +213,32 @@ export const phase3OverlaySchedule = onSchedule(
         const prevWeekId = `${isoYear}-${pad2(prevWeek)}`;
         await computeWeeklyOverlayForUser(uid, prevWeekId);
       }
+    });
+
+    await Promise.all(tasks);
+  }
+);
+
+export const phase6DailySchedule = onSchedule(
+  {
+    schedule: "every day 00:10",
+    timeZone: "Asia/Tokyo",
+  },
+  async () => {
+    const db = admin.firestore();
+    const usersSnap = await db.collection("users").get();
+
+    const tasks = usersSnap.docs.map(async (doc) => {
+      const uid = doc.id;
+
+      // 前日分を確定生成する
+      const today = jstTodayDateId(new Date());
+      const target = prevDateId(today);
+
+      await computeDailyForUser(uid, target);
+
+      // Daily確定後にBaselineを更新
+      await computeBaselineForUser(uid);
     });
 
     await Promise.all(tasks);
