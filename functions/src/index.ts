@@ -8,6 +8,7 @@ import { defineString } from "firebase-functions/params";
 import { computeDailyForUser } from "./phase6/daily/computeDailyForUser";
 import { computeBaselineForUser } from "./phase6/baseline/computeBaselineForUser";
 import { jstTodayDateId, prevDateId } from "./phase6/shared/time";
+export { callTimeSlicedDialogue, callContextualPrefill } from "./phase7";
 
 
 import * as admin from "firebase-admin";
