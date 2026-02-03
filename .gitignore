@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 functions/multi-layer-mirror-664a2-firebase-adminsdk-fbsvc-732e48b0f7.json
+app/lib/firebase.ts
