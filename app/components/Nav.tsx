@@ -3,20 +3,39 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function Nav() {
-  const pathname = usePathname();
+const items = [
+  {href:"/write",label:"write"},
+  {href:"/context",label:"context"},
+  {href:"/timeline",label:"timeline"},
+  {href:"/daily",label:"daily"},
+  {href:"/talk",label:"talk"},
+  {href:"/prefill",label:"prefill"},
+];
 
-  const style = (path: string) => ({
-    marginRight: "16px",
-    textDecoration: pathname === path ? "underline" : "none",
-  });
-
+export default function Nav(){
+  const p = usePathname();
   return (
-    <nav className="nav">
-      <a href="/write">write</a>
-      <a href="/context">context</a>
-      <a href="/timeline">timeline</a>
-      <a href="/daily">daily</a>
-    </nav>
+    <div className="card" style={{boxShadow:"none",background:"rgba(255,255,255,.55)"}}>
+      <div className="cardPad" style={{display:"flex",gap:26,flexWrap:"wrap",alignItems:"center"}}>
+        {items.map(it=>{
+          const on = p?.startsWith(it.href);
+          return (
+            <Link
+              key={it.href}
+              href={it.href}
+              style={{
+                padding:"8px 10px",
+                borderRadius:12,
+                border:on ? "1px solid rgba(15,23,42,.12)" : "1px solid transparent",
+                background:on ? "rgba(255,255,255,.8)" : "transparent",
+                fontWeight:on ? 700 : 500
+              }}
+            >
+              {it.label}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }

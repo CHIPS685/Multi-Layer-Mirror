@@ -1,103 +1,135 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useMemo, useState } from "react";
+import PageShell from "../components/PageShell";
+import Card from "../components/Card";
+import SectionHeader from "../components/SectionHeader";
+import EmptyState from "../components/EmptyState";
+import Skeleton from "../components/Skeleton";
+import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
-type AxisScores = {
-  action: number;
-  obstacle: number;
-  evaluation: number;
-  control: number;
-};
-
+type AxisScores = { action:number; obstacle:number; evaluation:number; control:number; };
 type DailyDoc = {
-  dateId: string;
-  axesMean: AxisScores;
-  delta?: AxisScores;
-  source?: {
-    fragmentCount?: number;
-    observationCount?: number;
-  };
+  dateId:string;
+  axesMean:AxisScores;
+  deltaPrevDay?:AxisScores;
+  baseline?:AxisScores;
+  fragmentCount?:number;
+  observationCount?:number;
+  text?:string;
 };
 
-export default function DailyPage() {
-  const [uid, setUid] = useState<string | null>(null);
-  const [dailies, setDailies] = useState<DailyDoc[]>([]);
+const labels:Record<keyof AxisScores,string> = {
+  action:"動きやすさ",
+  obstacle:"引っかかり",
+  evaluation:"手応え",
+  control:"整い具合",
+};
 
-  // 認証状態を正しく待つ
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUid(user.uid);
+function fmt(n:number|undefined){
+  if(n===undefined||n===null||Number.isNaN(n))return"—";
+  return n.toFixed(2);
+}
+
+function fmtDelta(n:number|undefined){
+  if(n===undefined||n===null||Number.isNaN(n))return"";
+  const s = n>=0 ? `+${n.toFixed(2)}` : `${n.toFixed(2)}`;
+  return `(${s})`;
+}
+
+export default function DailyPage(){
+  const [uid,setUid]=useState<string|null>(null);
+  const [dateId,setDateId]=useState(()=>new Date().toISOString().slice(0,10));
+  const [loading,setLoading]=useState(false);
+  const [daily,setDaily]=useState<DailyDoc|null>(null);
+  const [baseline,setBaseline]=useState<AxisScores|null>(null);
+
+  useEffect(()=>{
+    const u=auth.currentUser;
+    if(!u)return;
+    setUid(u.uid);
+  },[]);
+
+  useEffect(()=>{
+    if(!uid)return;
+    (async()=>{
+      setLoading(true);
+      try{
+        const b = await getDoc(doc(db,`users/${uid}/baselines/current`));
+        setBaseline(b.exists() ? (b.data() as any).axesMedian ?? (b.data() as any).axesMean ?? null : null);
+        const d = await getDoc(doc(db,`users/${uid}/dailies/${dateId}`));
+        setDaily(d.exists() ? ({dateId, ...(d.data() as any)}) : null);
+      }finally{
+        setLoading(false);
       }
-    });
-    return () => unsub();
-  }, []);
+    })();
+  },[uid,dateId]);
 
-  useEffect(() => {
-    if (!uid) return;
-
-    const q = query(
-      collection(db, `users/${uid}/dailies`),
-      orderBy("dateId", "desc")
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      const list: DailyDoc[] = [];
-      snap.forEach((doc) => list.push(doc.data() as DailyDoc));
-      setDailies(list);
-    });
-
-    return () => unsub();
-  }, [uid]);
+  const blocks = useMemo(()=>{
+    const a=daily?.axesMean;
+    const dp=daily?.deltaPrevDay;
+    const base = (daily as any)?.baseline ?? baseline;
+    const keys:(keyof AxisScores)[]=["action","obstacle","evaluation","control"];
+    return keys.map(k=>({
+      k,
+      label:labels[k],
+      value:fmt(a?.[k]),
+      delta:fmtDelta(dp?.[k]),
+      base:fmt(base?.[k]),
+    }));
+  },[daily,baseline]);
 
   return (
-    <div className="app-container">
-      <h1 className="page-title">Daily</h1>
-      <p className="page-subtitle">日ごとの観測結果</p>
+    <PageShell title="Daily" sub="当日値と前日比と基準差を、評価せずに並べます。">
+      <Card>
+        <SectionHeader
+          title="日付"
+          sub="日付を切り替えて、その日の輪郭だけを確認します。"
+          right={<input className="input" style={{width:190}} type="date" value={dateId} onChange={(e)=>setDateId(e.target.value)}/>}
+        />
+      </Card>
 
-      {dailies.length === 0 && (
-        <p style={{ color: "#666" }}>まだDailyは生成されていません</p>
+      <div style={{height:16}}/>
+
+      {loading ? (
+        <Card>
+          <div style={{display:"flex",flexDirection:"column",gap:10}}>
+            <Skeleton h={18}/>
+            <Skeleton h={18}/>
+            <Skeleton h={18}/>
+          </div>
+        </Card>
+      ) : !daily ? (
+        <EmptyState title="この日のDailyはまだありません" sub="未生成は正常です。推測で埋めません。"/>
+      ) : (
+        <Card>
+          <SectionHeader title={dateId} sub={`記録${daily.fragmentCount ?? 0}件観測${daily.observationCount ?? 0}件`}/>
+          <div className="hr"/>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+            {blocks.map(b=>(
+              <div key={b.k} className="card" style={{boxShadow:"none",background:"rgba(255,255,255,.75)"}}>
+                <div className="cardPad">
+                  <div className="small" style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span className="dot"/>
+                    <span>{b.label}</span>
+                  </div>
+                  <div style={{marginTop:10,fontSize:28,fontWeight:900,letterSpacing:"-.02em"}}>
+                    {b.value}<span className="small" style={{marginLeft:8}}>{b.delta}</span>
+                  </div>
+                  <div className="small" style={{marginTop:10}}>基準{b.base}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {daily.text ? (
+            <>
+              <div className="hr"/>
+              <div className="small" style={{lineHeight:1.8,whiteSpace:"pre-wrap"}}>{daily.text}</div>
+            </>
+          ) : null}
+        </Card>
       )}
-
-      {dailies.map((d) => (
-        <div
-          key={d.dateId}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: "8px",
-            padding: "12px",
-            marginBottom: "16px",
-          }}
-        >
-          <div style={{ fontSize: "14px", fontWeight: 500 }}>
-            {d.dateId}
-          </div>
-
-          <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
-            fragments: {d.source?.fragmentCount ?? 0} / observations:{" "}
-            {d.source?.observationCount ?? 0}
-          </div>
-
-          <div style={{ marginTop: "8px", fontSize: "13px" }}>
-            <div>action: {d.axesMean.action.toFixed(2)}</div>
-            <div>obstacle: {d.axesMean.obstacle.toFixed(2)}</div>
-            <div>evaluation: {d.axesMean.evaluation.toFixed(2)}</div>
-            <div>control: {d.axesMean.control.toFixed(2)}</div>
-          </div>
-
-          {d.delta && (
-            <div style={{ marginTop: "8px", fontSize: "12px", color: "#555" }}>
-              <div>Δ action: {d.delta.action.toFixed(2)}</div>
-              <div>Δ obstacle: {d.delta.obstacle.toFixed(2)}</div>
-              <div>Δ evaluation: {d.delta.evaluation.toFixed(2)}</div>
-              <div>Δ control: {d.delta.control.toFixed(2)}</div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
+    </PageShell>
   );
 }
