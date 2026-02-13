@@ -1,11 +1,12 @@
-export default function SectionHeader(props:{title:string;sub?:string;right?:React.ReactNode;}){
+"use client";
+
+export default function SectionHeader(props: { title: string; subtitle?: string }) {
   return (
-    <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:14}}>
-      <div style={{minWidth:0}}>
-        <div style={{fontSize:18,fontWeight:700}}>{props.title}</div>
-        {props.sub ? <div className="small" style={{marginTop:6,lineHeight:1.6}}>{props.sub}</div> : null}
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+      <div>
+        <div style={{ fontSize: 16, fontWeight: 700 }}>{props.title}</div>
+        {props.subtitle ? <div style={{ marginTop: 4, fontSize: 12, opacity: 0.75 }}>{props.subtitle}</div> : null}
       </div>
-      {props.right ? <div>{props.right}</div> : null}
     </div>
   );
 }

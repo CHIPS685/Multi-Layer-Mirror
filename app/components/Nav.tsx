@@ -3,39 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const items = [
-  {href:"/write",label:"write"},
-  {href:"/context",label:"context"},
-  {href:"/timeline",label:"timeline"},
-  {href:"/daily",label:"daily"},
-  {href:"/talk",label:"talk"},
-  {href:"/prefill",label:"prefill"},
-];
-
-export default function Nav(){
-  const p = usePathname();
+function Tab(props: { href: string; label: string }) {
+  const pathname = usePathname();
+  const active = pathname === props.href;
   return (
-    <div className="card" style={{boxShadow:"none",background:"rgba(255,255,255,.55)"}}>
-      <div className="cardPad" style={{display:"flex",gap:26,flexWrap:"wrap",alignItems:"center"}}>
-        {items.map(it=>{
-          const on = p?.startsWith(it.href);
-          return (
-            <Link
-              key={it.href}
-              href={it.href}
-              style={{
-                padding:"8px 10px",
-                borderRadius:12,
-                border:on ? "1px solid rgba(15,23,42,.12)" : "1px solid transparent",
-                background:on ? "rgba(255,255,255,.8)" : "transparent",
-                fontWeight:on ? 700 : 500
-              }}
-            >
-              {it.label}
-            </Link>
-          );
-        })}
-      </div>
+    <Link
+      href={props.href}
+      style={{
+        padding: "10px 12px",
+        borderRadius: 10,
+        textDecoration: "none",
+        color: active ? "white" : "inherit",
+        background: active ? "black" : "transparent",
+        border: "1px solid rgba(0,0,0,0.12)",
+      }}
+    >
+      {props.label}
+    </Link>
+  );
+}
+
+export default function Nav() {
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <Tab href="/write" label="write" />
+      <Tab href="/day" label="day" />
     </div>
   );
 }

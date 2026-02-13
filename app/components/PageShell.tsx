@@ -1,14 +1,14 @@
-export default function PageShell(props:{
-  title:string;
-  sub?:string;
-  children:React.ReactNode;
-}){
+"use client";
+
+import React from "react";
+
+export default function PageShell(props: { title: string; children: React.ReactNode }) {
   return (
-    <div className="container">
-      <h1 className="h1">{props.title}</h1>
-      {props.sub ? <p className="sub">{props.sub}</p> : null}
-      <div style={{height:22}}/>
-      {props.children}
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: 16 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{props.title}</h1>
+      </div>
+      <div style={{ marginTop: 16 }}>{props.children}</div>
     </div>
   );
 }

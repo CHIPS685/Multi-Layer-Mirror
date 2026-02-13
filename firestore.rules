@@ -1,64 +1,18 @@
+// firestore.rules(該当部分だけ)
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
-    // 人間が書く領域（write OK）
     match /users/{uid}/fragments/{fragmentId} {
       allow read, write: if isOwner(uid);
     }
 
-    match /users/{uid}/contexts/{contextId} {
-      allow read, write: if isOwner(uid);
-    }
-
-    // 派生・確定データ（read only）
-    match /users/{uid}/observations/{observationId} {
+    match /users/{uid}/dayDiaries/{dateId}/versions/{versionId} {
       allow read: if isOwner(uid);
       allow write: if false;
     }
-
-    match /users/{uid}/weekly/{weekId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
-    match /users/{uid}/crystals/{weekId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
-    match /users/{uid}/overlays/{overlayId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
-    match /users/{uid}/dailies/{dateId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
-    match /users/{uid}/baselines/{baselineId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-    match /users/{uid}/dialogueSessions/{sessionId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-
-      match /turns/{turnId} {
-        allow read: if isOwner(uid);
-        allow write: if false;
-      }
-    }
-
-    match /users/{uid}/prefills/{prefillId} {
-      allow read: if isOwner(uid);
-      allow write: if false;
-    }
-
   }
 }

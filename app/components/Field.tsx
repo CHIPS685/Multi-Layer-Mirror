@@ -1,41 +1,12 @@
-export function Field(props:{
-  label:string;
-  value:string;
-  onChange:(v:string)=>void;
-  placeholder?:string;
-  type?:"text"|"date";
-}){
-  return (
-    <div>
-      <div className="label">{props.label}</div>
-      <input
-        className="input"
-        value={props.value}
-        placeholder={props.placeholder}
-        type={props.type ?? "text"}
-        onChange={(e)=>props.onChange(e.target.value)}
-      />
-    </div>
-  );
-}
+"use client";
 
-export function TextArea(props:{
-  label:string;
-  value:string;
-  onChange:(v:string)=>void;
-  placeholder?:string;
-  rows?:number;
-}){
+import React from "react";
+
+export default function Field(props: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <div className="label">{props.label}</div>
-      <textarea
-        className="input"
-        style={{minHeight:(props.rows ?? 6)*22,resize:"vertical"}}
-        value={props.value}
-        placeholder={props.placeholder}
-        onChange={(e)=>props.onChange(e.target.value)}
-      />
+    <div style={{ display: "grid", gap: 6 }}>
+      <div style={{ fontSize: 12, opacity: 0.75 }}>{props.label}</div>
+      {props.children}
     </div>
   );
 }
