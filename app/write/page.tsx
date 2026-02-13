@@ -9,6 +9,8 @@ import Field from "../components/Field";
 import EmptyState from "../components/EmptyState";
 import { db, ensureSignedIn } from "../lib/firebase";
 import { normalizeDateId, todayDateId } from "../lib/date";
+import { uploadPhotoForDay } from "../lib/photos";
+import { auth } from "../lib/firebase";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -18,6 +20,10 @@ export default function WritePage() {
   const [text, setText] = useState<string>("");
   const [state, setState] = useState<SaveState>("idle");
   const [error, setError] = useState<string>("");
+
+  const [uploading, setUploading] = useState(false);
+  const [photoCaption, setPhotoCaption] = useState("");
+
 
   useEffect(() => {
     ensureSignedIn()

@@ -80,6 +80,7 @@ export const callGenerateDayDiary = onCall(async (req) => {
   const versionRef = db.doc(`users/${uid}/dayDiaries/${dateId}/versions/${versionId}`);
 
   const payload = {
+    uid, 
     dateId,
     generatedAt,
     model,

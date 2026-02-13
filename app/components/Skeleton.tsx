@@ -1,8 +1,14 @@
+"use client";
+
 export default function Skeleton(props: { height?: number }) {
   return (
     <div
-      className="rounded-xl bg-black/5 animate-pulse"
-      style={{ height: props.height ?? 16 }}
+      style={{
+        height: props.height ?? 12,
+        borderRadius: 10,
+        background: "rgba(0,0,0,0.08)",
+        animation: "pulse 1.2s ease-in-out infinite",
+      }}
     />
   );
 }
