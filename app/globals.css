@@ -1,306 +1,346 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* 全画面共通の最大幅 */
-.app-container {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* 見出しを主張しすぎない */
-h1 {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 24px;
-}
-
-h2 {
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-/* リストのノイズを消す */
-ul {
-  padding-left: 16px;
-  margin: 0;
-}
-
-li {
-  line-height: 1.6;
-}
-
-.nav {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  margin: 48px 0 56px 0; 
-}
-
-.nav a {
-  font-size: 14px;
-  color: #666;
-  text-decoration: none;
-  padding-bottom: 4px;
-}
-
-.nav a.active {
-  color: #000;
-  font-weight: 600;
-  border-bottom: 1px solid #000;
-}
-
-.write-page textarea {
-  width: 100%;
-  min-height: 240px;
-  font-size: 16px;
-  line-height: 1.8;
-  outline: none;
-  resize: vertical;
-}
-
-.write-page button {
-  margin-top: 24px;
-}
-
-.context-page label {
-  font-size: 13px;
-  color: #555;
-}
-
-.context-page input {
-  font-size: 14px;
-  padding: 6px 4px;
-  margin-bottom: 16px;
-}
-
-.context-page button {
-  margin-top: 24px;
-}
-
-.timeline-week {
-  padding: 16px 0;
-  border-left: 2px solid #eee;
-  padding-left: 16px;
-}
-
-.timeline-week + .timeline-week {
-  margin-top: 24px;
-}
-
-.timeline-week > div:first-child {
-  font-size: 13px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-/* Crystal lines */
-.timeline-week li {
-  line-height: 1.7;
-}
-
-/* Context tags */
-.timeline-week span {
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  padding: 2px 8px;
-  font-size: 12px;
-}
-
-.page-title {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 40px;
-}
-
-.context-page input {
-  color: var(--foreground);
-  background-color: transparent;
-}
-
-input,
-textarea {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 14px;
-  background-color: transparent;
-  color: var(--foreground);
-}
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border-color: #888;
-}
-
-
 :root{
-  --bg:#eef6f1;
-  --card:#ffffff;
-  --text:#0f172a;
-  --muted:#64748b;
-  --line:rgba(15,23,42,.08);
-  --shadow:0 10px 30px rgba(15,23,42,.06);
-  --radius:18px;
+  --bg:#f6f7fb;
+  --surface:#ffffff;
+  --text:#1a1a1a;
+  --sub:#6b7280;
+  --border:#e5e7eb;
+
+  --shadow:0 10px 24px rgba(0,0,0,0.08);
+  --shadow2:0 6px 14px rgba(0,0,0,0.06);
+
+  --radius:22px;
+
+  --primary:#ff4d4d;
+  --primaryDark:#e63b3b;
+  --primarySoft:#ffefef;
+  --gold:#f5c542;
 }
 
-html,body{height:100%;}
+html,body{
+  height:100%;
+}
+
 body{
   margin:0;
   color:var(--text);
   background:var(--bg);
-  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP","Hiragino Sans","Yu Gothic",Arial;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
 }
 
-a{color:inherit;text-decoration:none;}
-*{box-sizing:border-box;}
-
-.container{
-  max-width:1040px;
-  margin:0 auto;
-  padding:28px 20px;
+a{
+  color:inherit;
+  text-decoration:none;
 }
 
-.card{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+button{
+  font-family:inherit;
 }
 
-.cardPad{padding:22px;}
-
-.h1{
-  font-size:44px;
-  letter-spacing:-.02em;
-  margin:0;
-}
-
-.sub{
-  margin:10px 0 0 0;
-  color:var(--muted);
-  line-height:1.6;
-}
-
-.row{
+.mlm-home{
+  min-height:100vh;
   display:flex;
-  gap:18px;
+  flex-direction:column;
 }
 
-.col{
+.mlm-homeHeader{
+  position:sticky;
+  top:0;
+  z-index:10;
+  padding:14px 16px 16px;
+  background:linear-gradient(180deg,#ff5a55 0%, #ff7a45 100%);
+  color:white;
+  box-shadow:var(--shadow2);
+}
+
+.mlm-homeHeaderRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.mlm-homeTitle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.mlm-avatar{
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.18);
+  border:1px solid rgba(255,255,255,0.25);
+  box-shadow:0 6px 14px rgba(0,0,0,0.10);
+}
+
+.mlm-titleText{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:0.2px;
+}
+
+.mlm-headerActions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.mlm-iconBtn{
+  width:38px;
+  height:38px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.25);
+  background:rgba(255,255,255,0.14);
+  color:white;
+  cursor:pointer;
+  box-shadow:0 6px 14px rgba(0,0,0,0.10);
+}
+
+.mlm-homeBody{
   flex:1;
-  min-width:0;
+  padding:14px 16px 26px;
 }
 
-@media(max-width:880px){
-  .row{flex-direction:column;}
+.mlm-container{
+  max-width:980px;
+  margin:0 auto;
 }
 
-.hr{
-  height:1px;
-  background:var(--line);
-  margin:18px 0;
+.mlm-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow2);
 }
 
-.kbd{
+.mlm-calendarCard{
+  overflow:hidden;
+}
+
+.mlm-calTop{
+  padding:16px;
+  background:linear-gradient(180deg,#ff6a5f 0%, #ff8b4e 100%);
+  color:white;
+}
+
+.mlm-calTopRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.mlm-monthLabel{
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:0.2px;
+  line-height:1;
+}
+
+.mlm-chip{
   display:inline-flex;
   align-items:center;
-  border:1px solid var(--line);
-  border-radius:10px;
+  gap:6px;
   padding:6px 10px;
-  color:var(--muted);
-  background:rgba(255,255,255,.6);
-  font-size:13px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.30);
+  background:rgba(255,255,255,0.14);
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
 }
 
-.btn{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.7);
-  color:var(--text);
-  border-radius:14px;
-  padding:12px 16px;
-  cursor:pointer;
-}
-
-.btnPrimary{
-  border:0;
-  background:rgba(22,163,74,.85);
-  color:#fff;
-  border-radius:14px;
-  padding:12px 16px;
-  cursor:pointer;
-}
-
-.btn:disabled,.btnPrimary:disabled{opacity:.55;cursor:not-allowed;}
-
-.input{
-  width:100%;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.85);
-  border-radius:14px;
-  padding:12px 14px;
-  font-size:15px;
-  outline:none;
-}
-
-.label{
-  font-size:13px;
-  color:var(--muted);
-  margin:0 0 8px 2px;
-}
-
-.small{
-  font-size:13px;
-  color:var(--muted);
-}
-
-.pill{
-  display:inline-flex;
+.mlm-calNav{
+  display:flex;
   align-items:center;
   gap:8px;
-  border:1px solid var(--line);
-  border-radius:999px;
-  padding:8px 12px;
-  background:rgba(255,255,255,.6);
-  font-size:13px;
-  color:var(--text);
 }
 
-.dot{
-  width:10px;
-  height:10px;
+.mlm-calNavBtn{
+  width:36px;
+  height:36px;
   border-radius:999px;
-  background:rgba(15,23,42,.2);
+  border:1px solid rgba(255,255,255,0.30);
+  background:rgba(255,255,255,0.14);
+  color:white;
+  cursor:pointer;
+}
+
+.mlm-dow{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:8px;
+  font-size:12px;
+  opacity:0.95;
+}
+
+.mlm-dow div{
+  text-align:center;
+  font-weight:800;
+}
+
+.mlm-calGrid{
+  margin-top:10px;
+  display:grid;
+  gap:8px;
+}
+
+.mlm-calRow{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:8px;
+}
+
+.mlm-dayBtn{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.25);
+  cursor:pointer;
+  font-weight:900;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+}
+
+.mlm-dayInMonth{
+  opacity:1;
+}
+
+.mlm-dayOutMonth{
+  opacity:0.45;
+}
+
+.mlm-dayNormal{
+  background:rgba(255,255,255,0.18);
+  color:white;
+}
+
+.mlm-dayToday{
+  background:rgba(255,255,255,0.92);
+  color:var(--primary);
+  box-shadow:0 10px 18px rgba(0,0,0,0.12);
+}
+
+.mlm-mark{
+  position:absolute;
+  top:6px;
+  right:6px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  line-height:12px;
+}
+
+.mlm-calBottom{
+  padding:14px 16px 16px;
+  background:linear-gradient(180deg,#fff7f2 0%, #ffffff 100%);
+}
+
+.mlm-cta{
+  width:100%;
+  border:none;
+  border-radius:18px;
+  padding:14px 12px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:16px;
+  color:white;
+  background:linear-gradient(180deg,#ff3f3f 0%, #ffb22e 100%);
+  box-shadow:0 10px 18px rgba(0,0,0,0.10);
+}
+
+.mlm-ctaSub{
+  width:100%;
+  border:none;
+  border-radius:18px;
+  padding:14px 12px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:16px;
+  color:white;
+  background:linear-gradient(180deg,#ff4d4d 0%, #ff6f3a 100%);
+  box-shadow:0 10px 18px rgba(0,0,0,0.10);
+}
+
+.mlm-hint{
+  margin-top:10px;
+  border-radius:16px;
+  border:1px dashed var(--border);
+  padding:10px 12px;
+  color:var(--sub);
+  font-size:12px;
+  font-weight:800;
+}
+
+/* day/write を home トーンに寄せるための共通枠 */
+.mlm-page{
+  min-height:100vh;
+  background:var(--bg);
+}
+
+.mlm-pageBody{
+  padding:14px 16px 28px;
+}
+
+.mlm-panel{
+  padding:16px;
+}
+
+.mlm-sectionTitle{
+  margin:0 0 10px;
+  font-size:14px;
+  font-weight:950;
+  color:var(--sub);
+  letter-spacing:0.4px;
+}
+
+.mlm-input,
+.mlm-textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px 12px;
+  font-size:14px;
+  outline:none;
+  background:white;
+  box-shadow:inset 0 1px 0 rgba(0,0,0,0.02);
+}
+
+.mlm-textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.mlm-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.mlm-btn{
+  border:none;
+  border-radius:16px;
+  padding:12px 14px;
+  cursor:pointer;
+  font-weight:900;
+  box-shadow:0 8px 14px rgba(0,0,0,0.08);
+}
+
+.mlm-btnPrimary{
+  color:white;
+  background:linear-gradient(180deg,#ff3f3f 0%, #ffb22e 100%);
+}
+
+.mlm-btnSoft{
+  color:var(--primaryDark);
+  background:var(--primarySoft);
+  border:1px solid rgba(255,77,77,0.25);
+  box-shadow:none;
 }

@@ -25,7 +25,6 @@ export function monthIdFromDate(d: Date): string {
   return `${yyyy}-${mm}`;
 }
 
-
 export function shiftMonthId(monthId: string, deltaMonths: number): string {
   const m = /^(\d{4})-(\d{2})$/.exec(monthId);
   if (!m) return monthIdFromDate(new Date());
