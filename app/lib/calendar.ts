@@ -51,3 +51,4 @@ export async function getMonthMarks(args: Args): Promise<Record<string, DayMark>
 
   return result;
 }
+
