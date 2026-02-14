@@ -2,15 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import PageShell from "../components/PageShell";
-import Nav from "../components/Nav";
 import Card from "../components/Card";
 import Field from "../components/Field";
 import EmptyState from "../components/EmptyState";
 import { db, ensureSignedIn } from "../lib/firebase";
 import { normalizeDateId, todayDateId } from "../lib/date";
-import { uploadPhotoForDay } from "../lib/photos";
-import { auth } from "../lib/firebase";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 

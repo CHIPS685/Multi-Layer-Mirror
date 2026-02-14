@@ -22,3 +22,13 @@ function Tab(props: { href: string; label: string }) {
     </Link>
   );
 }
+
+export default function Nav() {
+  return (
+    <nav style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <Tab href="/write" label="write" />
+      <Tab href="/calendar" label="calendar" />
+      <Tab href="/day" label="day" />
+    </nav>
+  );
+}
